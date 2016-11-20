@@ -24,7 +24,7 @@ function Article(props){
                 {props.article.text}
             </CardText>
             <CardActions>
-                <Link to='/article'><FlatButton label='Ver m&aacutes' /></Link>
+                <Link to='/article'><FlatButton label='Ver m&aacute;s' /></Link>
             </CardActions>
         </Card>
     )

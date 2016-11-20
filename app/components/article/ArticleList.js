@@ -78,7 +78,7 @@ const articles = [{
 }]
 
 const articleComponent = article => (
-  <Col xs={4} key={article.id}>
+  <Col xs={3} key={article.id}>
     <Article  article={article} />
   </Col>
   )
