@@ -13,14 +13,18 @@ module.exports = {
         path: PATHS.static,
         filename: "bundle.js"
     },
+    resolve: {
+        extensions: ['', '.js', '.jsx']
+    },
     module: {
         loaders: [{
-                test: /\.js?$/,
+                test: /\.(js|jsx)?$/,
                 loader: 'babel-loader',
                 query: {
                     presets: ['es2015', 'react']
                 },
-                exclude: /node_modules/
+                exclude: /node_modules/,
+
             },
             {
                 test: /\.css$/,
