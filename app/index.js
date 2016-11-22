@@ -11,6 +11,7 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 
 injectTapEventPlugin();
 
+// require('font-awesome/css/font-awesome.css');
 require('./style.css');
 
 ReactDOM.render((
