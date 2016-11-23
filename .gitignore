@@ -2,4 +2,9 @@
 env
 node_modules
 static/bundle.js
+static/*.eot
+static/*.svg
+static/*.woff2
+static/*.ttf
+static/*.wof
 
