@@ -33,6 +33,7 @@
     "react": "^15.4.0",
     "react-bootstrap": "^0.30.6",
     "react-dom": "^15.4.0",
+    "react-mfb": "^0.4.1",
     "react-router": "^3.0.0",
     "react-tap-event-plugin": "^2.0.1"
   }
