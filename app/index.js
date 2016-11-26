@@ -6,6 +6,7 @@ import Main from './Main';
 import Article from './components/article/Article';
 import ArticleList from './components/article/ArticleList';
 import Authenticate from './components/session/Authenticate';
+import CommentBox from './components/comment/CommentBox';
 
 import injectTapEventPlugin from 'react-tap-event-plugin';
 
@@ -22,6 +23,7 @@ ReactDOM.render((
             <IndexRoute component={ArticleList} />
             <Route path="/list" component={Article}/>
             <Route path="/authenticate" component={Authenticate}/>
+            <Route path="/comment" component={CommentBox} />
         </Route>
     </Router>
     ), document.getElementById('reactEntry')
