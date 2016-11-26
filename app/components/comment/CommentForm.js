@@ -3,6 +3,10 @@ import React, { Component } from 'react';
 import {Grid, Row, Col} from 'react-bootstrap/lib/';
 import {Card, TextField, RaisedButton} from 'material-ui';
 
+const styles = {
+	margin : 20
+}
+
 class CommentForm extends Component {
 	constructor(props){
 			super(props);
@@ -48,9 +52,9 @@ class CommentForm extends Component {
 	}
 	render() {
 		return (
-			<Grid>
+
 				<Row>
-					<Col xs={10} xsOffset={1}>
+					<Col xs={9} xsOffset={1}>
 						<Card	title="Post a Comment">
 							<form onSubmit={this.handleSubmit}>
 								<TextField
@@ -60,6 +64,7 @@ class CommentForm extends Component {
 									onChange={this.handleChange}
 									type="text"
 									value={this.state.name}
+									style={styles}
 								/><br/>
 								<TextField
 									name="comment"
@@ -68,14 +73,14 @@ class CommentForm extends Component {
 									onChange={this.handleChange}
 									type="text"
 									value={this.state.comment}
-									fullWidth={true}
+									style={styles}
 								/><br/>
-								<RaisedButton type="submit" label="Submit" primary={true} />
+								<RaisedButton type="submit" label="Submit" primary={true} style={styles} />			
 							</form>
 						</Card>
 					</Col>
 				</Row>
-			</Grid>
+
 		);
 	}
 }

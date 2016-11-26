@@ -16,6 +16,7 @@ const CommentList = (props) => {
 							props.data.map(comment => {
 								return(
 									<ListItem
+											key={comment.id}
 											leftAvatar={<Avatar src="http://static.zerochan.net/Himura.Kenshin.full.551192.jpg" />}
 											primaryText={comment.user}
 											secondaryText={

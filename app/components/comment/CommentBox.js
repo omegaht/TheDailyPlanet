@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
-
+// Material-ui Components
+import {Grid} from 'react-bootstrap/lib/';
+// Own Components
 import CommentForm from './CommentForm';
 import CommentList from './CommentList';
 
@@ -41,10 +43,10 @@ class CommentBox extends Component {
 
 	render() {
 		return (
-			<div>
+			<Grid>
 				<CommentForm data={this.state.comments} onCommentSubmit={this.handleCommentSubmit} />
 				<CommentList data={this.state.comments} />
-			</div>
+			</Grid>
 		);
 	}
 }
