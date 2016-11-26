@@ -10,7 +10,7 @@ const CommentList = (props) => {
 		return(
 			<Grid>
 				<Row>
-					<Col xs="{10}">
+					<Col xs={10} xsOffset={1}>
 					<List>
 						{
 							props.data.map(comment => {
