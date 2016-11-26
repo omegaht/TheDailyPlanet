@@ -21,8 +21,10 @@ For the backend:
 
 ```
 virtualenv env
-Windows: env/Scripts/activate
-Linux: source venv/bin/activate
+activate it
+    Windows: env/Scripts/activate
+    Linux: source venv/bin/activate
+then install the requirements
 pip install -r requirements.txt
 ```
 
