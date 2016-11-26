@@ -21,7 +21,7 @@ function Article(props){
                 <img src={props.article.src} />
             </CardMedia>
             <CardText>
-                {props.article.text}
+               <div dangerouslySetInnerHTML={{__html: props.article.text}} ></div>
             </CardText>
             <CardActions>
                 <Link to='/article'><FlatButton label='Ver m&aacute;s' /></Link>
