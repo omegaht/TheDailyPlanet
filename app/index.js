@@ -11,8 +11,10 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 
 injectTapEventPlugin();
 
-// require('font-awesome/css/font-awesome.css');
-require('./style.css');
+require("!style!css!../node_modules/font-awesome/css/font-awesome.min.css");
+require("!style!css!../node_modules/bootstrap/dist/css/bootstrap.min.css");
+require("!style!css!../node_modules/react-mfb/mfb.css");
+require('!style!css!./style.css');
 
 ReactDOM.render((
     <Router history={hashHistory}>

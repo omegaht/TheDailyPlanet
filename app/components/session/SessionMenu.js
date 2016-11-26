@@ -10,18 +10,18 @@ export default class RenderMenu extends Component {
     render(){
         return(
             <Menu effect={effect} method={method} position={pos}>
-                <MainButton iconResting="ion-plus-round" iconActive="ion-close-round" />
+                <MainButton iconResting="fa fa-plus" iconActive="fa fa-times" />
                 <ChildButton
                     //onClick={function(e){ console.log(e); e.preventDefault(); }}
-                    icon="ion-social-github"
+                    icon="fa fa-github-alt"
                     label="View on Github"
                     href="https://github.com/nobitagit/react-material-floating-button/" />
                 <ChildButton
-                    icon="ion-social-octocat"
+                    icon="fa fa-github"
                     label="Follow me on Github"
                     href="https://github.com/nobitagit" />
                 <ChildButton
-                    icon="ion-social-twitter"
+                    icon="fa fa-twitter"
                     label="Share on Twitter"
                     href="http://twitter.com/share?text=Amazing MIRA ESTE BETA JORGE!" />
             </Menu>
