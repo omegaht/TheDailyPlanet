@@ -60,10 +60,10 @@ class Authenticate extends Component {
 			password: user.password
 		})
 		.then(function (response) {
-			console.log(response);
+			alert('sucessfull, you are now registerd!');
 		})
 		.catch(function (error) {
-			console.log(error);
+
 		});
 	}
 

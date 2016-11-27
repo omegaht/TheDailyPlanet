@@ -6,6 +6,8 @@ import MenuItem from 'material-ui/MenuItem';
 import SvgIconMenu from 'material-ui/svg-icons/navigation/menu';
 import TextField from 'material-ui/TextField';
 import SvgIconSearch from 'material-ui/svg-icons/action/search';
+// React-router
+import {hashHistory} from 'react-router';
 
 const IconMenuController = () => {
     return(
@@ -13,13 +15,8 @@ const IconMenuController = () => {
             iconButtonElement={<IconButton><SvgIconMenu /></IconButton>}
             targetOrigin={{vertical: 'bottom', horizontal: 'left'}}
             >
-            <MenuItem value='1' primaryText='Econom&iacutea' />
-            <MenuItem value='2' primaryText='Deportes' />
-            <MenuItem value='3' primaryText='Opini&oacuten' />
-            <MenuItem value='4' primaryText='Entretenimiento' />
-            <MenuItem value='5' primaryText='Internacional' />
-            <MenuItem value='6' primaryText='Sucesos' />
-            <MenuItem value='7' primaryText='Pol&iacutetica' />
+            <MenuItem value='1' primaryText='SignIn' onClick={() => {hashHistory.push('/authenticate')}}/>
+            <MenuItem value='2' primaryText='LogIn' onClick={() => {hashHistory.push('/authenticate')}} />
         </IconMenu>
     )
 }

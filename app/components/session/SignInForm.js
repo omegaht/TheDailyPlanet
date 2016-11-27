@@ -65,7 +65,7 @@ class SignInForm extends React.Component {
 			<div>
 				<h2>Sign In with email</h2>
 					<form onSubmit={this.handleSubmit}>
-						<Col xs={12} md={4}>
+						<Col xs={12} md={12}>
 							<TextField
 								name="email"
 								hintText="Enter your email"
@@ -76,7 +76,7 @@ class SignInForm extends React.Component {
 								style={styles}
 								/>
 						</Col>
-						<Col xs={12} md={4}>
+						<Col xs={12} md={12}>
 							<TextField
 								name="name"
 								floatingLabelText="Name"
@@ -86,7 +86,7 @@ class SignInForm extends React.Component {
 								style={styles}
 								/>
 						</Col>
-						<Col xs={12} md={4}>
+						<Col xs={12} md={12}>
 							<TextField
 								name="password"
 								floatingLabelText="Password"
@@ -96,7 +96,7 @@ class SignInForm extends React.Component {
 								style={styles}
 								/>
 						</Col>
-						<Col xs={10} xsOffset={1} md={4}>
+						<Col xs={10} xsOffset={1} md={12}>
 							<RaisedButton type="submit" label="Submit" primary={true} style={styles} />
 						</Col>
 					</form>

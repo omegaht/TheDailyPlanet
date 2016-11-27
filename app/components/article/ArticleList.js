@@ -35,16 +35,16 @@ export default class ArticleList extends Component {
 
 	setValueOnResponse(response) {
 		var articles = response.data.articles;
-		console.log(articles)
+
 		this.setState({ articles });
-		console.log(this.state);
+
 	}
 
 	componentDidMount() {
 		axios.get('/article/feed')
 			.then(this.setValueOnResponse)
 			.catch(function (error) {
-				console.log(error);
+
 			});
 	}
 
