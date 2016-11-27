@@ -1,6 +1,11 @@
-import React, {PropTypes} from 'react';
+import React, { PropTypes } from 'react';
 // Material-ui Componets
-import {Card, CardHeader, CardTitle, CardMedia, CardText} from 'material-ui/Card';
+import { Card, CardHeader, CardTitle, CardMedia, CardText, CardActions } from 'material-ui/Card';
+import IconButton from 'material-ui/IconButton';
+import ActionShare from 'material-ui/svg-icons/social/share';
+import ActionPrint from 'material-ui/svg-icons/action/print';
+import ActionLike from 'material-ui/svg-icons/action/favorite';
+import ActionEdit from 'material-ui/svg-icons/content/create';
 
 const ArticleFull = props => {
 	return (
@@ -18,8 +23,22 @@ const ArticleFull = props => {
 				<img src={props.article.src} />
 			</CardMedia>
 			<CardText>
-				<div dangerouslySetInnerHTML={{__html: props.article.text}} ></div>
+				<div dangerouslySetInnerHTML={{ __html: props.article.text }} ></div>
 			</CardText>
+			<CardActions>
+				<IconButton tooltip="share" touch={true} tooltipPosition="top-right">
+					<ActionShare />
+				</IconButton>
+				<IconButton tooltip="print" touch={true} tooltipPosition="top-right">
+					<ActionPrint />
+				</IconButton>
+				<IconButton tooltip="edit" touch={true} tooltipPosition="top-right">
+					<ActionEdit />
+				</IconButton>
+								<IconButton tooltip="like" touch={true} tooltipPosition="top-right">
+					<ActionLike />
+				</IconButton>
+			</CardActions>
 		</Card>
 	);
 };
