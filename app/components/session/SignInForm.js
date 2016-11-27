@@ -52,7 +52,7 @@ class SignInForm extends React.Component {
 			return;
 		}
 		
-		this.props.onSignInSubmit({ email: emailValue, password: passwordValue });
+		this.props.onSignInSubmit({ email: emailValue, password: passwordValue, name: nameValue});
 		event.target[0].value = '';
 		event.target[1].value = '';
 		event.target[2].value = '';
@@ -79,7 +79,6 @@ class SignInForm extends React.Component {
 						<Col xs={12} md={4}>
 							<TextField
 								name="name"
-								hintText="Enter your name"
 								floatingLabelText="Name"
 								onChange={this.handleChange}
 								type="text"
@@ -90,7 +89,6 @@ class SignInForm extends React.Component {
 						<Col xs={12} md={4}>
 							<TextField
 								name="password"
-								hintText="Enter your password"
 								floatingLabelText="Password"
 								onChange={this.handleChange}
 								type="text"

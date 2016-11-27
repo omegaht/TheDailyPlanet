@@ -52,12 +52,11 @@ class LoginForm extends React.Component {
   render() {
     return (
 			<div>
-				<h2>Post a comment</h2>
+				<h2>Log In</h2>
 					<form onSubmit={this.handleSubmit}>
 						<Col xs={12} md={4}>
 							<TextField
 								name="email"
-								hintText="email"
 								floatingLabelText="Enter your email"
 								onChange={this.handleChange}
 								type="text"
@@ -68,7 +67,6 @@ class LoginForm extends React.Component {
 						<Col xs={12} md={4}>
 							<TextField
 								name="password"
-								hintText="password"
 								floatingLabelText="Enter your password"
 								onChange={this.handleChange}
 								type="text"

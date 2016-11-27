@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
+// Own Components
 import LoginForm from './LoginForm';
 import SignInForm from './SignInForm';
-
+// Material-ui
 import { Tabs, Tab } from 'material-ui/Tabs';
+// React-Boostrap
 import { Row, Col } from 'react-bootstrap/lib/';
-
+// React-router
+import {hashHistory} from 'react-router';
 //Para la conexion con la api
 import axios from 'axios';
 
@@ -27,7 +30,7 @@ class Authenticate extends Component {
 			value: 'login',
 		};
 		this.handleChange = this.handleChange.bind(this);
-		this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
+		this.handleLogInSubmit = this.handleLogInSubmit.bind(this);
 		this.handleSignInSubmit = this.handleSignInSubmit.bind(this);
 	}
 	// Manejo de tabs.
@@ -36,7 +39,7 @@ class Authenticate extends Component {
 			value: value,
 		});
 	}
-	handleLoginSubmit(user) {
+	handleLogInSubmit(user) {
 		// me conecto con la api para hacer la peticion enviando el user.email user.password .
 		axios.post('/login', {
 			email: user.email,
@@ -44,6 +47,7 @@ class Authenticate extends Component {
 		})
 		.then(function (response) {
 			console.log(response);
+			hashHistory.push('/');
 		})
 		.catch(function (error) {
 			console.log(error);
@@ -76,7 +80,7 @@ class Authenticate extends Component {
 						>
 						<Tab label="Login" value="login" >
 							<div>
-								<LoginForm  onCommentSubmit={this.handleCommentSubmit} />
+								<LoginForm  onLoginSubmit={this.handleLogInSubmit} />
 							</div>
 						</Tab>
 						<Tab label="SignIn" value="register">

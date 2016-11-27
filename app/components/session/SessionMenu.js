@@ -1,30 +1,82 @@
-import React, {Component} from 'react';
-
-import {Menu, MainButton, ChildButton} from 'react-mfb';
+import React, { Component, PropTypes } from 'react';
+// Metrial-ui
+import { Menu, MainButton, ChildButton } from 'react-mfb';
+//Para la conexion con la api
+import axios from 'axios';
 
 let effect = 'zoomin',
-    pos = 'br',
-method = 'hover';
+	pos = 'br',
+	method = 'hover';
+
+const MenuLogged = (props) => {
+	return (
+		<Menu effect={effect} method={method} position={pos}>
+			<MainButton iconResting="fa fa-plus" iconActive="fa fa-times" />
+				<ChildButton
+					icon="fa fa-facebook"
+					label="Share on facebook"
+					href="https://www.facebook.com/r.php" />
+			<ChildButton
+				icon="fa fa-twitter"
+				label="Share on Twitter"
+				href="http://twitter.com/share?text=Amazing MIRA ESTE BETA JORGE!" />
+							<ChildButton
+				icon="fa fa-user-o"
+				label={props.name}
+				href="/" />
+		</Menu>
+	)
+}
+
+const MenuNoLogged = () => {
+	return (
+		<Menu effect={effect} method={method} position={pos}>
+			<MainButton iconResting="fa fa-plus" iconActive="fa fa-times" />
+			<ChildButton
+				icon="fa fa-facebook"
+				label="Share on facebook"
+				href="https://www.facebook.com/r.php" />
+
+			<ChildButton
+				icon="fa fa-twitter"
+				label="Share on Twitter"
+				href="http://twitter.com/share?text=Amazing MIRA ESTE BETA JORGE!" />
+			<ChildButton
+				icon="fa fa-user-o"
+				label="user"
+				href="/" />
+		</Menu>
+	)
+}
 
 export default class RenderMenu extends Component {
-    render(){
-        return(
-            <Menu effect={effect} method={method} position={pos}>
-                <MainButton iconResting="fa fa-plus" iconActive="fa fa-times" />
-                <ChildButton
-                    //onClick={function(e){ console.log(e); e.preventDefault(); }}
-                    icon="fa fa-github-alt"
-                    label="View on Github"
-                    href="https://github.com/nobitagit/react-material-floating-button/" />
-                <ChildButton
-                    icon="fa fa-github"
-                    label="Follow me on Github"
-                    href="https://github.com/nobitagit" />
-                <ChildButton
-                    icon="fa fa-twitter"
-                    label="Share on Twitter"
-                    href="http://twitter.com/share?text=Amazing MIRA ESTE BETA JORGE!" />
-            </Menu>
-        )
-    }
+	constructor(props) {
+		super(props);
+		this.state = {
+			userName: ''
+		}
+	}
+
+	componentWillMount(){
+		console.log('hola');
+		axios.get('/user/info')
+		.then(function (response) {
+			console.log(response);
+			this.setState({userName: response.data.name})
+		})
+		.catch(function (error) {
+			console.log(error);
+		});
+	}
+
+	render() {
+		if (this.state.user == ! null){
+			return <MenuLogged name={this.state.userName}/>; 
+		}
+		return <MenuNoLogged />;
+	}
 }
+
+MenuLogged.propTypes = {
+	name: PropTypes.string,
+};
