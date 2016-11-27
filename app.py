@@ -422,16 +422,29 @@ def notposted():
 		# Buscamos al usuario en la base de datos.
 		theUser = db.User.find_one({'email': email, 'password': password})
 		#Verificamos que el usuario pueda acceder a los articulos no publicados.
-		if theUser['type'] in ['author', 'admin']:
-			# Obtenemos todos los articulos no publicados.
-			theArticleList = db.Article.find({'posted': False})
-			# Cambiamos el formato de los atributos.
-			for article in theArticleList:
-				articleList.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'],
-				'date': article['time-create'], 'text': article['abstract'], 'autorId': article['author'],
-				'likes': article['likes'], 'comments': article['coments']})
-			# Ordenamos por fecha los articulos.
-			articleList = sorted(articleList, key=sortArticleByTime, reverse=True)
+		if theUser['type'] in ['author', 'admin', 'editor']:
+			#Verificamos si es un autor.
+			if theUser['type'] == 'author':
+				# Obtenemos todos los articulos no publicados creados por ese autor.
+				theArticleList = db.Article.find({'posted': False, 'autorID': email})
+				# Cambiamos el formato de los atributos.
+				print(theArticleList.count())
+				for article in theArticleList:
+					articleList.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'],
+					'date': article['time-create'], 'text': article['abstract'], 'author': article['author'],
+					'likes': article['likes'], 'comments': article['coments']})
+				# Ordenamos por fecha los articulos.
+				articleList = sorted(articleList, key=sortArticleByTime, reverse=True)
+			else:
+				# Obtenemos todos los articulos no publicados.
+				theArticleList = db.Article.find({'posted': False})
+				# Cambiamos el formato de los atributos.
+				for article in theArticleList:
+					articleList.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'],
+					'date': article['time-create'], 'text': article['abstract'], 'author': article['author'],
+					'likes': article['likes'], 'comments': article['coments']})
+				# Ordenamos por fecha los articulos.
+				articleList = sorted(articleList, key=sortArticleByTime, reverse=True)
 		# Cerramos la conexion con la base de datos.
 		client.close()
 	# Retornamos la lista de articulos
@@ -514,6 +527,81 @@ def commget():
 	client.close()
 	# Devolvemos el resultado de la peticion.
 	return jsonify({'comments': commentList})
+
+'''
+	Esta peticion retorna el articulo indicado segun su 'id'.
+	Parametro que resibe: {
+		"IDArticle": "aqui recibimos el id del articulo",
+	}
+	Parametros que retorna: {
+			"src": "Ubicacion de la imagen.",
+			"title": "Titulo del articulo.",
+			"category": "Categorias a la que pertenece el articulo.",
+			"date": "Fecha de publicacion del articulo.",
+			"text": "Abstract del articulo.",
+			"autorId": "E-Mail del autor del articulo.",
+			"likes": "Cantidad de Likes.",
+			"comments": "Cantidad de comentarios.",
+			"id": "ID del articulo."
+		}
+'''
+@app.route('/article/get', methods = ['POST'])
+def getart():
+	#Creamos el JSON donde ira el articulo a retornar.
+	article = {}
+	#Almacenamos el id del articulo deseado.
+	idArticle = request.json
+	# Creamos la conexion con la base de datos.
+	(client, db) = getConnectionToDB()
+	# Iniciamos sin un usuario.
+	theUser = None
+	# Verificamos si tenemos una sesion activa.
+	if 'data' in session:
+		# El usuario tiene una sesion activa.
+		# Obtenemos los datos de la sesion.
+		email = session['data']['email']
+		password = session['data']['password']
+		# Buscamos al usuario en la base de datos.
+		theUser = db.User.find_one({'email': email, 'password': password})
+	#Buscamos el articulo solicitado.
+	theArticle = db.Article.find_one(ObjectId(idArticle['IDArticle']))
+	#Verificamos si es un articulo que ya ha sido publicado.
+	if theUser:
+		#Es un usuario registrado.
+		if theArticle['posted']:
+			#El articulo esta publicado.
+			#Almacenamos los campos del articulo.
+			article = {'id': str(theArticle['_id']), 'src': theArticle['image'], 'category': theArticle['category'],
+				'date': theArticle['time-create'], 'text': theArticle['abstract'], 'autorId': theArticle['author'],
+				'likes': theArticle['likes'], 'comments': theArticle['coments']}
+		else:
+			#El articulo no esta publicado.
+			#Verificamos si el usuario tiene permisos para ver articulos no publicados.
+			if theUser['type'] in ['author', 'admin', 'editor']:
+				#Verificamos si es el autor del articulo.
+				if theUser['type'] == 'author':
+					if theArticle['author'] == email:
+						#Es el autor del articulo.
+						article = {'id': str(theArticle['_id']), 'src': theArticle['image'], 'category': theArticle['category'],
+							'date': theArticle['time-create'], 'text': theArticle['abstract'], 'author': theArticle['author'],
+							'likes': theArticle['likes'], 'comments': theArticle['coments']}
+				#Los editores y admin pueden acceder al articulo.
+				else:
+					article = {'id': str(theArticle['_id']), 'src': theArticle['image'], 'category': theArticle['category'],
+						'date': theArticle['time-create'], 'text': theArticle['abstract'], 'autorId': theArticle['author'],
+						'likes': theArticle['likes'], 'comments': theArticle['coments']}
+	else:
+		#Es un usuario visitante.
+		if theArticle['posted']:
+			#El articulo esta publicado.
+			#Verificamos que sea un articulo del dia para que lo pueda acceder el visitante.
+			if datetime.now().date() == datetime.strptime(theArticle['time-create'], "%d/%m/%Y - %I:%M%p").date():
+				#Almacenamos los campos del articulo.
+				article = {'id': str(theArticle['_id']), 'src': theArticle['image'], 'category': theArticle['category'],
+					'date': theArticle['time-create'], 'text': theArticle['abstract'], 'autorId': theArticle['author'],
+					'likes': theArticle['likes'], 'comments': theArticle['coments']}
+	#Retornamos la respuesto
+	return jsonify({'article': article})
 
 if __name__ == '__main__':
 	app.run(host='localhost', port=80, debug=True)
