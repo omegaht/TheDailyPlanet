@@ -384,6 +384,9 @@ def feed():
 				'likes': article['likes'], 'coments': article['coments']})
 		# Ordenamos por fecha los articulos.
 		articleList = sorted(articleList, key=sortArticleByTime, reverse=True)
+	# Cerramos la conexion con la base de datos.
+	client.close()
+	# Devolvemos el resultado de la peticion.
 	return jsonify({'articles': articleList})
 
 if __name__ == '__main__':
