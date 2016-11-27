@@ -428,7 +428,6 @@ def notposted():
 				# Obtenemos todos los articulos no publicados creados por ese autor.
 				theArticleList = db.Article.find({'posted': False, 'autorID': email})
 				# Cambiamos el formato de los atributos.
-				print(theArticleList.count())
 				for article in theArticleList:
 					articleList.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'],
 					'date': article['time-create'], 'text': article['abstract'], 'author': article['author'],
