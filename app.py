@@ -7,6 +7,9 @@ def getConnectionToDB():
 	client = MongoClient('localhost', 27017)
 	return (client, client['DailyPlanet'])
 
+def sortArticleByTime(var):
+	return datetime.strptime(var['date'], "%d/%m/%Y - %I:%M%p")
+
 app = Flask(__name__)
 app.secret_key = 'VanfH8STX0i0a6I0a4CYF93LoM1Eh6ST6gOa08mio0GrVdU3xYR3Vtfj9kkpj8p5'
 
@@ -244,6 +247,7 @@ def edit():
 		"articleAbstract": "aqui recibimos el resumen del articulo en markdown",
 		"articleTitle": "aqui recibimos el titulo del articulo",
 		"articleImage": "aqui la direccion a la imagen destacada del articulo",
+		"articleCatgory": "aqui ponemos la categoria a la que pertenece el articulo",
 		"articleId": "este es el id del articulo",
 		"articlePosted": "aqui recibimos si este usuario aprobo el articulo (booleano)"
 	}
@@ -275,11 +279,13 @@ def post():
 				'abstract': article['articleAbstract'],
 				'title': article['articleTitle'],
 				'image': article['articleImage'],
+				'category': article['articleCatgory'],
 				'time-create': datetime.now().strftime("%d/%m/%Y - %I:%M%p"),
 				'time-edited': datetime.now().strftime("%d/%m/%Y - %I:%M%p"),
 				'likes': 0,
 				'coments': 0,
 				'editors': [],
+				'author' : email,
 				'posted': False
 			})
 			# Establesemos el mensaje a retornar.
@@ -305,6 +311,7 @@ def post():
 				dbArticle['content'] = article['articleContent'] if article['articleContent'] else dbArticle['content']
 				dbArticle['abstract'] = article['articleAbstract'] if article['articleAbstract'] else dbArticle['abstract']
 				dbArticle['image'] = article['articleImage'] if article['articleImage'] else dbArticle['image']
+				dbArticle['category'] = article['articleCatgory'] if article['articleCatgory'] else dbArticle['category']
 				dbArticle['time-edited'] = datetime.now().strftime("%d/%m/%Y - %I:%M%p")
 				# Actualizamos la informacion en la base de datos.
 				db.Article.update_one({'_id': dbArticle['_id']}, {"$set": dbArticle}, upsert=False)
@@ -314,10 +321,70 @@ def post():
 			else:
 				stringErrorMessage = 'Error #00008 / dbArticle'
 				stringStatus = 'error'
-	# Cerramos la conexion con la base de datos.
-	client.close()
+		# Cerramos la conexion con la base de datos.
+		client.close()
 	# Devolvemos el resultado de la peticion.
 	return jsonify({'status': stringStatus, 'errorMessage': stringErrorMessage})
 
+'''
+	Esta peticion retorna los articulos que se mostraan en el feed principal.
+	Parametros que retorna: [
+		{
+			"src": "Ubicacion de la imagen.",
+			"title": "Titulo del articulo.",
+			"category": "Categorias a la que pertenece el articulo.",
+			"date": "Fecha de publicacion del articulo.",
+			"text": "Abstract del articulo.",
+			"autorId": "E-Mail del autor del articulo.",
+			"likes": "Cantidad de Likes.",
+			"comments": "Cantidad de comentarios.",
+			"id": "ID del articulo."
+		}, 
+		{ ... },
+		{ ... }
+	]
+'''
+@app.route('/article/feed', methods=['GET'])
+def feed():
+	# Creamos la conexion con la base de datos.
+	(client, db) = getConnectionToDB()
+	# Iniciamos sin un usuario.
+	theUser = None
+	# Verificamos si tenemos una sesion activa.
+	if 'data' in session:
+		# El usuario tiene una sesion activa.
+		# Obtenemos los datos de la sesion.
+		email = session['data']['email']
+		password = session['data']['password']
+		# Buscamos al usuario en la base de datos.
+		theUser = db.User.find_one({'email': email, 'password': password})
+	# Asignamos donde vamos a obtener el resultado de la consulta.
+	articleList = []
+	# Verificamos si es un visitante o un usuario registado.
+	if theUser :
+		# Es un usuario registrado.
+		# Obtenemos todos los articulos publicados.
+		theArticleList = db.Article.find({'posted': True})
+		# Cambiamos el formato de los atributos.
+		for article in theArticleList:
+			articleList.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'],
+			'date': article['time-create'], 'text': article['abstract'], 'autorId': article['author'],
+			'likes': article['likes'], 'coments': article['coments']})
+		# Ordenamos por fecha los articulos.
+		articleList = sorted(articleList, key=sortArticleByTime, reverse=True)
+	else:
+		# Es un visitante.
+		# Obtenemos todos los articulos publicados.
+		theArticleList = db.Article.find({'posted': True})
+		# Cambiamos el formato de los atributos.
+		for article in theArticleList:
+			if datetime.now().date() == datetime.strptime(article['time-create'], "%d/%m/%Y - %I:%M%p").date():
+				articleList.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'],
+				'date': article['time-create'], 'text': article['abstract'], 'autorId': article['author'],
+				'likes': article['likes'], 'coments': article['coments']})
+		# Ordenamos por fecha los articulos.
+		articleList = sorted(articleList, key=sortArticleByTime, reverse=True)
+	return jsonify({'articles': articleList})
+
 if __name__ == '__main__':
-	app.run(port=80, debug=True)
+	app.run(host='localhost', port=80, debug=True)
