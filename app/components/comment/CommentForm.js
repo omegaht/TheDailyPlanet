@@ -19,19 +19,9 @@ class CommentForm extends Component {
 	}
 	handleChange(event) {
 		if (event.target.name === 'name') {
-			this.setState(
-				{
-					name: event.target.value,
-					comment: this.state.comment
-				}
-			)
+			this.setState({name: event.target.value, comment: this.state.comment})
 		} else {
-			this.setState(
-				{
-					name: this.state.name,
-					comment: event.target.value
-				}
-			)
+			this.setState({name: this.state.name,	comment: event.target.value})
 		}
 	}
 	handleSubmit(event) {

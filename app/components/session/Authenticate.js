@@ -1,62 +1,95 @@
 import React, { Component } from 'react';
 import LoginForm from './LoginForm';
-import SignUpForm from './SignUpForm';
+import SignInForm from './SignInForm';
 
 import { Tabs, Tab } from 'material-ui/Tabs';
-import {Row, Col} from 'react-bootstrap/lib/';
+import { Row, Col } from 'react-bootstrap/lib/';
+
+//Para la conexion con la api
+import axios from 'axios';
 
 const styles = {
-  headline: {
-    fontSize: 24,
-    paddingTop: 16,
-    marginBottom: 12,
-    fontWeight: 400,
-  },
-  tabs: {
-      paddingTop: 50
-  }
+	headline: {
+		fontSize: 24,
+		paddingTop: 16,
+		marginBottom: 12,
+		fontWeight: 400,
+	},
+	tabs: {
+		paddingTop: 50
+	}
 };
 
-
 class Authenticate extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            value: 'login',
-        };
-        this.handleChange = this.handleChange.bind(this)
-    }
- handleChange(value) {
-        this.setState({
-            value: value,
-    });
-  }
+	constructor(props) {
+		super(props);
+		this.state = {
+			value: 'login',
+		};
+		this.handleChange = this.handleChange.bind(this);
+		this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
+		this.handleSignInSubmit = this.handleSignInSubmit.bind(this);
+	}
+	// Manejo de tabs.
+	handleChange(value) {
+		this.setState({
+			value: value,
+		});
+	}
+	handleLoginSubmit(user) {
+		// me conecto con la api para hacer la peticion enviando el user.email user.password .
+		axios.post('/login', {
+			email: user.email,
+			password: user.password
+		})
+		.then(function (response) {
+			console.log(response);
+		})
+		.catch(function (error) {
+			console.log(error);
+		});
+	}
 
-  render() {
-    return (
-        <Row>
-            <Col xs={6} xsOffset={3}>
-                <Tabs
-                    value={this.state.value}
-                    onChange={this.handleChange}
-                    style={styles.tabs}
-                    >
-                    <Tab label="Login" value="login" >
-                        <div>
-                            <LoginForm/>
-                        </div>
-                    </Tab>
-                    <Tab label="SignIn" value="register">
-                        <div>
-                            <SignUpForm/>
-                        </div>
-                    </Tab>
-                </Tabs>
-            </Col>
-        </Row>
-        
-    );
-  }
+	handleSignInSubmit(user) {
+		// me conecto con la api para hacer la peticion enviando el user.name user.email user.password2.
+		axios.post('/sigin', {
+			name: user.name,
+			email: user.email,
+			password: user.password
+		})
+		.then(function (response) {
+			console.log(response);
+		})
+		.catch(function (error) {
+			console.log(error);
+		});
+	}
+
+	render() {
+		return (
+			<Row>
+				<Col xs={6} xsOffset={3}>
+					<Tabs
+						value={this.state.value}
+						onChange={this.handleChange}
+						style={styles.tabs}
+						>
+						<Tab label="Login" value="login" >
+							<div>
+								<LoginForm  onCommentSubmit={this.handleCommentSubmit} />
+							</div>
+						</Tab>
+						<Tab label="SignIn" value="register">
+							<div>
+								<SignInForm onSignInSubmit={this.handleSignInSubmit}/>
+							</div>
+						</Tab>
+					</Tabs>
+				</Col>
+			</Row>
+
+		);
+	}
 }
 
 export default Authenticate;
