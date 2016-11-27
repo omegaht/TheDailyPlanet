@@ -58,14 +58,12 @@ export default class RenderMenu extends Component {
 	}
 
 	componentWillMount(){
-		console.log('hola');
 		axios.get('/user/info')
 		.then(function (response) {
-			console.log(response);
 			this.setState({userName: response.data.name})
 		})
 		.catch(function (error) {
-			console.log(error);
+
 		});
 	}
 

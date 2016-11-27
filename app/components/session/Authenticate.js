@@ -46,11 +46,9 @@ class Authenticate extends Component {
 			password: user.password
 		})
 		.then(function (response) {
-			console.log(response);
 			hashHistory.push('/');
 		})
 		.catch(function (error) {
-			console.log(error);
 		});
 	}
 
