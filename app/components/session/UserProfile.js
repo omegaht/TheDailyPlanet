@@ -34,15 +34,16 @@ class UserProfile extends Component {
       name: 'Jhon Doe',
       type: 'admin',
       password: 123,
+      oldEmail: ''
     }
-    let oldEmail = '';
 
     this.handleChange = this.handleChange.bind(this);
     this.enterUser = this.enterUser.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   enterUser(response){
-    this.setState({ procced: true, email: response.data.email, name: response.data.name, type: response.data.type });
+    this.setState({ proceed: true, email: response.data.email, name: response.data.name, type: response.data.type , oldEmail: response.data.email});
   }
 
   componentWillMount() {
@@ -54,11 +55,6 @@ class UserProfile extends Component {
         // lo mandamos pal carajo si no esta logeado. (al main) quiero entrenar coño!
         hashHistory.push('/');
       });
-  }
-
-  componentDidMount(){
-    // salvo el email que viene del api.
-    this.oldEmail = this.state.email;
   }
 
   handleChange(event) {
@@ -107,7 +103,7 @@ class UserProfile extends Component {
       }
       // envio la data con el api
       axios.post('/user/edit', {
-        email: this.oldEmail,
+        email: this.state.oldEmail,
         newEmail: this.state.email,
         newName: this.state.name,
         newPassword: this.state.password,
