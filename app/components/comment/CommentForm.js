@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 // Material-ui components
 import { Col } from 'react-bootstrap/lib/';
-import { Card, CardTitle, cardMedia, TextField, RaisedButton } from 'material-ui';
+import { TextField, RaisedButton } from 'material-ui';
 
 const styles = {
 	margin: 10
@@ -55,7 +55,7 @@ class CommentForm extends Component {
 			<div>
 				<h2>Post a comment</h2>
 					<form onSubmit={this.handleSubmit}>
-						<Col xs={4}>
+						<Col xs={12} md={4}>
 							<TextField
 								name="name"
 								hintText="Name"
@@ -66,7 +66,7 @@ class CommentForm extends Component {
 								style={styles}
 								/>
 						</Col>
-						<Col xs={4}>
+						<Col xs={12} md={4}>
 							<TextField
 								name="comment"
 								hintText="Comment ..."
@@ -75,9 +75,10 @@ class CommentForm extends Component {
 								type="text"
 								value={this.state.comment}
 								style={styles}
+								fullWidth={true}
 								/>
 						</Col>
-						<Col xs={4}>
+						<Col xs={10} xsOffset={1} md={4}>
 							<RaisedButton type="submit" label="Submit" primary={true} style={styles} />
 						</Col>
 					</form>
