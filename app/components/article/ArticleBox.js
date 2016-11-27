@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-// Material-ui Components
+//Bootstrat-react Components
 import { Grid, Row, Col } from 'react-bootstrap/lib/';
 // Own Components
 import ArticleFull from './ArticleFull';
@@ -35,6 +35,8 @@ class ArticleBox extends Component {
 					<Col xs={12}>						
 						<ArticleFull article={this.state.article} />
 					</Col>
+				</Row>
+				<Row>
 					<Col xs={12}>						
 						<CommentBox />
 					</Col>

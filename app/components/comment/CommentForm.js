@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 // Material-ui components
 import { Col } from 'react-bootstrap/lib/';
-import { Card, CardTitle, TextField, RaisedButton } from 'material-ui';
+import { Card, CardTitle, cardMedia, TextField, RaisedButton } from 'material-ui';
 
 const styles = {
 	margin: 10
@@ -52,36 +52,36 @@ class CommentForm extends Component {
 	}
 	render() {
 		return (
-			<Card>
-				<CardTitle
-					title="Post a Comment"
-					/>
-				<form onSubmit={this.handleSubmit}>
-					<Col xs="{10}" xsOffset="{2}">
-						<TextField
-							name="name"
-							hintText="Name"
-							floatingLabelText="Enter your name"
-							onChange={this.handleChange}
-							type="text"
-							value={this.state.name}
-							style={styles}
-							/>
-					</Col>
-					<Col xs="{10}" xsOffset="{2}">
-						<TextField
-							name="comment"
-							hintText="Comment ..."
-							floatingLabelText="Enter your comment"
-							onChange={this.handleChange}
-							type="text"
-							value={this.state.comment}
-							style={styles}
-							/>
-					</Col>
-					<RaisedButton type="submit" label="Submit" primary={true} style={styles} />
-				</form>
-			</Card >
+			<div>
+				<h2>Post a comment</h2>
+					<form onSubmit={this.handleSubmit}>
+						<Col xs={4}>
+							<TextField
+								name="name"
+								hintText="Name"
+								floatingLabelText="Enter your name"
+								onChange={this.handleChange}
+								type="text"
+								value={this.state.name}
+								style={styles}
+								/>
+						</Col>
+						<Col xs={4}>
+							<TextField
+								name="comment"
+								hintText="Comment ..."
+								floatingLabelText="Enter your comment"
+								onChange={this.handleChange}
+								type="text"
+								value={this.state.comment}
+								style={styles}
+								/>
+						</Col>
+						<Col xs={4}>
+							<RaisedButton type="submit" label="Submit" primary={true} style={styles} />
+						</Col>
+					</form>
+			</div>
 		);
 	}
 }

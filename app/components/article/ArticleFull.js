@@ -6,6 +6,36 @@ import ActionShare from 'material-ui/svg-icons/social/share';
 import ActionPrint from 'material-ui/svg-icons/action/print';
 import ActionLike from 'material-ui/svg-icons/action/favorite';
 import ActionEdit from 'material-ui/svg-icons/content/create';
+import Badge from 'material-ui/Badge';
+import Avatar from 'material-ui/Avatar';
+import List from 'material-ui/List/List';
+import ListItem from 'material-ui/List/ListItem';
+
+const styles = {
+	wrapper: {
+		display: "flex",
+		flexWrap: "wrap"
+	}
+}
+
+const UsersAvatar = ()=> {
+	return(
+		<List style={styles.wrapper}>
+			<ListItem
+				disabled={true}
+				leftAvatar={<Avatar src="https://s-media-cache-ak0.pinimg.com/originals/49/68/0a/49680a5fd4de1b3bbdf2ca3fe0edf089.jpg" />}
+				>
+				Author
+			</ListItem>
+			<ListItem
+				disabled={true}
+				leftAvatar={<Avatar src="https://s-media-cache-ak0.pinimg.com/originals/49/68/0a/49680a5fd4de1b3bbdf2ca3fe0edf089.jpg" />}
+				>
+				Editor
+			</ListItem>
+		</List>	
+	);
+}
 
 const ArticleFull = props => {
 	return (
@@ -35,10 +65,18 @@ const ArticleFull = props => {
 				<IconButton tooltip="edit" touch={true} tooltipPosition="top-right">
 					<ActionEdit />
 				</IconButton>
-								<IconButton tooltip="like" touch={true} tooltipPosition="top-right">
+				<Badge
+					badgeContent={4}
+					primary={true}
+					>
 					<ActionLike />
-				</IconButton>
+				</Badge>
 			</CardActions>
+			<CardMedia
+				children={<UsersAvatar />}
+				>
+				
+			</CardMedia>
 		</Card>
 	);
 };

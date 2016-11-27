@@ -1,4 +1,6 @@
 import React, {Component} from 'react';
+//Bootstrat-react Components
+import { Row, Col } from 'react-bootstrap/lib/';
 // Own Components
 import CommentForm from './CommentForm';
 import CommentList from './CommentList';
@@ -40,10 +42,14 @@ class CommentBox extends Component {
 
 	render() {
 		return (
-			<div>
-				<CommentForm data={this.state.comments} onCommentSubmit={this.handleCommentSubmit} />
-				<CommentList data={this.state.comments} />
-			</div>
+			<Row>
+				<Col xs={12}>
+					<CommentForm data={this.state.comments} onCommentSubmit={this.handleCommentSubmit} />			
+				</Col>
+				<Col xs={12}>
+					<CommentList data={this.state.comments} />			
+				</Col>
+			</Row>
 		);
 	}
 }
