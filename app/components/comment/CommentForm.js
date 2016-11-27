@@ -1,23 +1,23 @@
 import React, { Component } from 'react';
 // Material-ui components
-import {Grid, Row, Col} from 'react-bootstrap/lib/';
-import {Card, TextField, RaisedButton} from 'material-ui';
+import { Col } from 'react-bootstrap/lib/';
+import { Card, CardTitle, TextField, RaisedButton } from 'material-ui';
 
 const styles = {
-	margin : 20
+	margin: 10
 }
 
 class CommentForm extends Component {
-	constructor(props){
-			super(props);
-			this.state = {
-				name: '',
-				comment: ''	
-			}
-			this.handleChange = this.handleChange.bind(this);
-			this.handleSubmit = this.handleSubmit.bind(this);
+	constructor(props) {
+		super(props);
+		this.state = {
+			name: '',
+			comment: ''
+		}
+		this.handleChange = this.handleChange.bind(this);
+		this.handleSubmit = this.handleSubmit.bind(this);
 	}
-	handleChange(event){
+	handleChange(event) {
 		if (event.target.name === 'name') {
 			this.setState(
 				{
@@ -25,7 +25,7 @@ class CommentForm extends Component {
 					comment: this.state.comment
 				}
 			)
-		}else {
+		} else {
 			this.setState(
 				{
 					name: this.state.name,
@@ -34,53 +34,54 @@ class CommentForm extends Component {
 			)
 		}
 	}
-	handleSubmit(event){
+	handleSubmit(event) {
 		event.preventDefault();
 		let nameValue = event.target[0].value.trim();
 		let textValue = event.target[1].value.trim();
 		if (nameValue === '')
 			nameValue = 'Anonymous'
 
-		if (textValue === ''){
-				alert('Text is required, no blank comments!');
-				return;
+		if (textValue === '') {
+			alert('Text is required, no blank comments!');
+			return;
 		}
-		this.props.onCommentSubmit({user: nameValue, text: textValue});
+		this.props.onCommentSubmit({ user: nameValue, text: textValue });
 		event.target[0].value = '';
 		event.target[1].value = '';
-		return; 
+		return;
 	}
 	render() {
 		return (
-
-				<Row>
-					<Col xs={9} xsOffset={1}>
-						<Card	title="Post a Comment">
-							<form onSubmit={this.handleSubmit}>
-								<TextField
-									name="name"
-									hintText="Name"
-									floatingLabelText="Enter your name"
-									onChange={this.handleChange}
-									type="text"
-									value={this.state.name}
-									style={styles}
-								/><br/>
-								<TextField
-									name="comment"
-									hintText="Comment ..."
-									floatingLabelText="Enter your comment"
-									onChange={this.handleChange}
-									type="text"
-									value={this.state.comment}
-									style={styles}
-								/><br/>
-								<RaisedButton type="submit" label="Submit" primary={true} style={styles} />			
-							</form>
-						</Card>
+			<Card>
+				<CardTitle
+					title="Post a Comment"
+					/>
+				<form onSubmit={this.handleSubmit}>
+					<Col xs="{10}" xsOffset="{2}">
+						<TextField
+							name="name"
+							hintText="Name"
+							floatingLabelText="Enter your name"
+							onChange={this.handleChange}
+							type="text"
+							value={this.state.name}
+							style={styles}
+							/>
 					</Col>
-				</Row>
-
+					<Col xs="{10}" xsOffset="{2}">
+						<TextField
+							name="comment"
+							hintText="Comment ..."
+							floatingLabelText="Enter your comment"
+							onChange={this.handleChange}
+							type="text"
+							value={this.state.comment}
+							style={styles}
+							/>
+					</Col>
+					<RaisedButton type="submit" label="Submit" primary={true} style={styles} />
+				</form>
+			</Card >
 		);
 	}
 }
@@ -88,5 +89,5 @@ class CommentForm extends Component {
 export default CommentForm;
 
 CommentForm.propTypes = {
-    onCommentSubmit: React.PropTypes.func.isRequired,
+	onCommentSubmit: React.PropTypes.func.isRequired,
 };
