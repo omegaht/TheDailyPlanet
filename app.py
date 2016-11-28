@@ -3,15 +3,33 @@ from bson.objectid import ObjectId
 from pymongo import MongoClient
 from datetime import datetime
 
+app = Flask(__name__)
+app.secret_key = 'VanfH8STX0i0a6I0a4CYF93LoM1Eh6ST6gOa08mio0GrVdU3xYR3Vtfj9kkpj8p5'
+
 def getConnectionToDB():
 	client = MongoClient('localhost', 27017)
 	return (client, client['DailyPlanet'])
 
-def sortArticleByTime(var):
+def sortByTime(var):
 	return datetime.strptime(var['date'], "%d/%m/%Y - %I:%M%p")
 
-app = Flask(__name__)
-app.secret_key = 'VanfH8STX0i0a6I0a4CYF93LoM1Eh6ST6gOa08mio0GrVdU3xYR3Vtfj9kkpj8p5'
+def sortByFav(var):
+	return var['likes']
+
+def sortByComment(var):
+	return var['comments']
+
+def simpleSearch(db, article, query):
+	if not article['title'].lower().find(query.lower()) == -1:
+		return True
+	if not article['key-words']. lower().find(query.lower()) == -1:
+		return True
+	author = db.User.find_one({'email': article['author']})
+	if author and not author['name'].lower().find(query.lower()) == -1:
+		return True
+	if author and not author['email'].lower().find(query.lower()) == -1:
+		return True
+	return False
 
 '''
 	Esta es la peticion encargada de cargar la pagina WEB.
@@ -53,7 +71,7 @@ def sigin():
 		# Agregamos al usuario a la base de datos.
 		userType = 'reader' if db.User.count() else 'admin'
 		db.User.insert_one({
-			'name': name, 'email': email, 'password': password, 'type': userType
+			'name': name, 'email': email, 'password': password, 'type': userType, 'favorites': [], 'image': '', 'description': ''
 			})
 	else:
 		# El usuario ya existe, preparamos los mensajes de error.
@@ -139,7 +157,8 @@ def logout():
 		'errorMessage': "aqui el mensaje de error"
 		"email": "aqui el correo electronico",
 		"name": "aqui el nombre del usuario",
-		"type": "aqui el tipo de usuario"
+		"type": "aqui el tipo de usuario",
+		"favorites": [arreglo con los ids de los articulos favoritos]
 	}
 '''
 @app.route('/user/info', methods=['GET', 'POST'])
@@ -163,10 +182,13 @@ def info():
 			email = theUser['email']
 			name = theUser['name']
 			UserType = theUser['type']
+			favorites = theUser['favorites']
+			image = theUser['image']
+			description = theUser['description']
 			stringErrorMessage = 'All is fine :P'
 			stringStatus = 'success'
 		# Devolvemos el resultado de la peticion.
-		return jsonify({'status': stringStatus, 'errorMessage': stringErrorMessage, 'email': email, 'name': name, 'type': UserType})
+		return jsonify({'status': stringStatus, 'errorMessage': stringErrorMessage, 'email': email, 'name': name, 'type': UserType, 'favorites': favorites, 'image': image, 'description': description})
 	if request.method == 'POST':
 		# Creamos la conexion con la base de datos.
 		(client, db) = getConnectionToDB()
@@ -182,19 +204,23 @@ def info():
 			email = theUser['email']
 			name = theUser['name']
 			UserType = theUser['type']
+			image = theUser['image']
+			favorites = theUser['favorites']
+			description = theUser['description']
 			# Devolvemos el resultado de la peticion.
-			return jsonify({'status': 'success', 'errorMessage': 'All is fine :P', 'email': email, 'name': name, 'type': UserType})
+			return jsonify({'status': 'success', 'errorMessage': 'All is fine :P', 'email': email, 'name': name, 'type': UserType, 'favorites': favorites, 'image': image, 'description': description})
 		else:
-			return jsonify({'status': 'error', 'errorMessage': 'Error #00005 / session[\'data\']', 'email': '', 'name': '', 'type': ''})
+			return jsonify({'status': 'error', 'errorMessage': 'Error #00005 / session[\'data\']', 'email': '', 'name': '', 'type': '', 'favorites': [], 'image': '', 'description': ''})
 
 '''
-	Esta peticion modifica la informacion del usuario.
+	Esta peticion modifica la informacion del usuario y cierra la session
 	Parametro que resibe: {
 		"email": "aqui el correo electronico",
-		"newEmail": "aqui el correo electronico",
 		"newName": "aqui el nombre del usuario",
 		"newPassword": "aqui la contrasena",
-		"newType": "aqui el tipo de usuario"
+		"newType": "aqui el tipo de usuario",
+		"newImage: "aqui la url de la nueva imagen",
+		"newDescription": "aqui la descripcion del usuario"
 	}
 	Parametros que retorna: {
 		"status": "aqui el resultado de la solicitud ("error/succses")",
@@ -212,27 +238,27 @@ def edit():
 		# Obtenemos los datos de la sesion.
 		email = session['data']['email']
 		password = session['data']['password']
-		# Obtenemos los datos del usuario a modificar.
-		emailModifyUser = request.json['email']
 		# Buscamos al usuario en la base de datos.
 		theCurrentUser = db.User.find_one({'email': email, 'password': password})
 		# Buscamos al usuario que queremos editar.
-		userToEdit = db.User.find_one({'email': emailModifyUser})
+		userToEdit = db.User.find_one({'email': request.json['email']})
 		# Buscamos si el nuevo email esta disponible.
-		if db.User.find_one({'email': request.json['newEmail']}) == None and not theCurrentUser == None:
+		if not theCurrentUser == None:
+			print(userToEdit)
 			# Asiganmos los nuevos valores a las variables.
-			userToEdit['email'] = request.json['newEmail'] if request.json['newEmail'] else userToEdit['email']
 			userToEdit['name'] = request.json['newName'] if request.json['newName'] else userToEdit['name']
 			userToEdit['password'] = request.json['newPassword'] if request.json['newPassword'] else userToEdit['password']
+			userToEdit['image'] = request.json['newImage'] if request.json['newImage'] else userToEdit['image']
+			userToEdit['description'] = request.json['newDescription'] if request.json['newDescription'] else userToEdit['description']
 			if theCurrentUser['type'] == 'admin':
 				userToEdit['type'] = request.json['newType'] if request.json['newType'] else userToEdit['type']
 			# Actualizamos la informacion en la base de datos.
-			db.User.update_one({'email': emailModifyUser}, {"$set": userToEdit}, upsert=False)
+			db.User.update_one({'email': request.json['email']}, {"$set": userToEdit}, upsert=False)
 			# Fijamos el mensaje de exito!
 			stringErrorMessage = 'All is fine :P'
 			stringStatus = 'success'
 			# Si el usuario se esta editando a el mismo cerramos la sesion.
-			if emailModifyUser == email:
+			if request.json['email'] == email:
 				session.pop('data', None)
 	# Cerramos la conexion con la base de datos.
 	client.close()
@@ -249,7 +275,8 @@ def edit():
 		"articleImage": "aqui la direccion a la imagen destacada del articulo",
 		"articleCatgory": "aqui ponemos la categoria a la que pertenece el articulo",
 		"articleId": "este es el id del articulo",
-		"articlePosted": "aqui recibimos si este usuario aprobo el articulo (booleano)"
+		"articlePosted": "aqui recibimos si este usuario aprobo el articulo (booleano)",
+		"articleKeyWords": "aqui ponemos las palabras claves del articulo"
 	}
 	Parametros que retorna: {
 		"status": "aqui el resultado de la solicitud ("error/succses")",
@@ -286,7 +313,8 @@ def post():
 				'coments': 0,
 				'editors': [],
 				'author' : email,
-				'posted': False
+				'posted': False,
+				'key-words': article['articleKeyWords']
 			})
 			# Establesemos el mensaje a retornar.
 			stringErrorMessage = 'All is fine :P'
@@ -312,6 +340,7 @@ def post():
 				dbArticle['abstract'] = article['articleAbstract'] if article['articleAbstract'] else dbArticle['abstract']
 				dbArticle['image'] = article['articleImage'] if article['articleImage'] else dbArticle['image']
 				dbArticle['category'] = article['articleCatgory'] if article['articleCatgory'] else dbArticle['category']
+				dbArticle['key-words'] = article['articleKeyWords'] if article['articleKeyWords'] else dbArticle['key-words']
 				dbArticle['time-edited'] = datetime.now().strftime("%d/%m/%Y - %I:%M%p")
 				# Actualizamos la informacion en la base de datos.
 				db.Article.update_one({'_id': dbArticle['_id']}, {"$set": dbArticle}, upsert=False)
@@ -369,9 +398,9 @@ def feed():
 		for article in theArticleList:
 			articleList.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'],
 			'date': article['time-create'], 'text': article['abstract'], 'autorId': article['author'],
-			'likes': article['likes'], 'coments': article['coments']})
+			'likes': article['likes'], 'coments': article['coments'], 'title': article['title']})
 		# Ordenamos por fecha los articulos.
-		articleList = sorted(articleList, key=sortArticleByTime, reverse=True)
+		articleList = sorted(articleList, key=sortByFav, reverse=True)
 	else:
 		# Es un visitante.
 		# Obtenemos todos los articulos publicados.
@@ -381,9 +410,9 @@ def feed():
 			if datetime.now().date() == datetime.strptime(article['time-create'], "%d/%m/%Y - %I:%M%p").date():
 				articleList.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'],
 				'date': article['time-create'], 'text': article['abstract'], 'autorId': article['author'],
-				'likes': article['likes'], 'coments': article['coments']})
+				'likes': article['likes'], 'coments': article['coments'], 'title': article['title']})
 		# Ordenamos por fecha los articulos.
-		articleList = sorted(articleList, key=sortArticleByTime, reverse=True)
+		articleList = sorted(articleList, key=sortByFav, reverse=True)
 	# Cerramos la conexion con la base de datos.
 	client.close()
 	# Devolvemos el resultado de la peticion.
@@ -431,9 +460,9 @@ def notposted():
 				for article in theArticleList:
 					articleList.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'],
 					'date': article['time-create'], 'text': article['abstract'], 'author': article['author'],
-					'likes': article['likes'], 'comments': article['coments']})
+					'likes': article['likes'], 'comments': article['coments'], 'title': article['title']})
 				# Ordenamos por fecha los articulos.
-				articleList = sorted(articleList, key=sortArticleByTime, reverse=True)
+				articleList = sorted(articleList, key=sortByTime, reverse=True)
 			else:
 				# Obtenemos todos los articulos no publicados.
 				theArticleList = db.Article.find({'posted': False})
@@ -441,9 +470,9 @@ def notposted():
 				for article in theArticleList:
 					articleList.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'],
 					'date': article['time-create'], 'text': article['abstract'], 'author': article['author'],
-					'likes': article['likes'], 'comments': article['coments']})
+					'likes': article['likes'], 'comments': article['coments'], 'title': article['title']})
 				# Ordenamos por fecha los articulos.
-				articleList = sorted(articleList, key=sortArticleByTime, reverse=True)
+				articleList = sorted(articleList, key=sortByTime, reverse=True)
 		# Cerramos la conexion con la base de datos.
 		client.close()
 	# Retornamos la lista de articulos
@@ -475,16 +504,24 @@ def commpost():
 		comment = request.json
 		# Buscamos al usuario en la base de datos.
 		theUser = db.User.find_one({'email': email, 'password': password})
-		# Agregamos el comentario a la base de datos.
-		db.Comment.insert_one({
-			'content': comment['commentContent'],
-			'article': comment['IDArticle'],
-			'user':  email,
-			'date': datetime.now().strftime("%d/%m/%Y - %I:%M%p")
-		})
-		# Establesemos el mensaje a retornar.
-		stringErrorMessage = 'All is fine :P'
-		stringStatus = 'success'
+		if theUser:
+			# Obtenemos el articulo comentado.
+			theArticle = db.Article.find_one(ObjectId(comment['IDArticle']))
+			if theArticle:
+				# Aumentamos el numero de comentarios en el articulo.
+				theArticle['coments'] = theArticle['coments'] + 1
+				# Actualizamos la informacion del articulo.
+				db.Article.update_one({'_id': ObjectId(comment['IDArticle'])}, {"$set": theArticle}, upsert=False)
+				# Agregamos el comentario a la base de datos.
+				db.Comment.insert_one({
+					'content': comment['commentContent'],
+					'article': comment['IDArticle'],
+					'user':  email,
+					'date': datetime.now().strftime("%d/%m/%Y - %I:%M%p")
+				})
+				# Establesemos el mensaje a retornar.
+				stringErrorMessage = 'All is fine :P'
+				stringStatus = 'success'
 		# Cerramos la conexion con la base de datos.
 		client.close()
 		# Devolvemos el resultado de la peticion.
@@ -521,7 +558,7 @@ def commget():
 	for comment in theCommentList:
 		commentList.append({'id': str(comment['_id']), 'content': comment['content'], 'article': comment['article'], 'user': comment['user'], 'date': comment['date']})
 	#Ordenamos los comentarios por fecha.
-	commentList = sorted(commentList, key = sortArticleByTime)
+	commentList = sorted(commentList, key = sortByTime)
 	# Cerramos la conexion con la base de datos.
 	client.close()
 	# Devolvemos el resultado de la peticion.
@@ -571,8 +608,9 @@ def getart():
 			#El articulo esta publicado.
 			#Almacenamos los campos del articulo.
 			article = {'id': str(theArticle['_id']), 'src': theArticle['image'], 'category': theArticle['category'],
-				'date': theArticle['time-create'], 'text': theArticle['abstract'], 'autorId': theArticle['author'],
-				'likes': theArticle['likes'], 'comments': theArticle['coments']}
+				'date': theArticle['time-create'], 'text': theArticle['content'], 'autorId': theArticle['author'],
+				'likes': theArticle['likes'], 'comments': theArticle['coments'], 'title': theArticle['title'], 
+				'editors': theArticle['editors'], 'key-words': theArticle['key-words']}
 		else:
 			#El articulo no esta publicado.
 			#Verificamos si el usuario tiene permisos para ver articulos no publicados.
@@ -583,12 +621,13 @@ def getart():
 						#Es el autor del articulo.
 						article = {'id': str(theArticle['_id']), 'src': theArticle['image'], 'category': theArticle['category'],
 							'date': theArticle['time-create'], 'text': theArticle['abstract'], 'author': theArticle['author'],
-							'likes': theArticle['likes'], 'comments': theArticle['coments']}
+							'likes': theArticle['likes'], 'comments': theArticle['coments'], 'key-words': theArticle['key-words']}
 				#Los editores y admin pueden acceder al articulo.
 				else:
 					article = {'id': str(theArticle['_id']), 'src': theArticle['image'], 'category': theArticle['category'],
-						'date': theArticle['time-create'], 'text': theArticle['abstract'], 'autorId': theArticle['author'],
-						'likes': theArticle['likes'], 'comments': theArticle['coments']}
+				'date': theArticle['time-create'], 'text': theArticle['content'], 'autorId': theArticle['author'],
+				'likes': theArticle['likes'], 'comments': theArticle['coments'], 'title': theArticle['title'], 
+				'editors': theArticle['editors'], 'key-words': theArticle['key-words']}
 	else:
 		#Es un usuario visitante.
 		if theArticle['posted']:
@@ -597,10 +636,287 @@ def getart():
 			if datetime.now().date() == datetime.strptime(theArticle['time-create'], "%d/%m/%Y - %I:%M%p").date():
 				#Almacenamos los campos del articulo.
 				article = {'id': str(theArticle['_id']), 'src': theArticle['image'], 'category': theArticle['category'],
-					'date': theArticle['time-create'], 'text': theArticle['abstract'], 'autorId': theArticle['author'],
-					'likes': theArticle['likes'], 'comments': theArticle['coments']}
+				'date': theArticle['time-create'], 'text': theArticle['content'], 'autorId': theArticle['author'],
+				'likes': theArticle['likes'], 'comments': theArticle['coments'], 'title': theArticle['title'], 
+				'editors': theArticle['editors']}
+	# Cerramos la conexion con la base de datos.
+	client.close()
 	#Retornamos la respuesto
 	return jsonify({'article': article})
 
+'''
+	Agrega el articulo seleccionado a la lista de favoritos del usuario.
+	Parametro que resibe: {
+		"IDArticle": "aqui recibimos el id del articulo",
+	}
+	Parametros que retorna: {
+		"status": "aqui el resultado de la solicitud ("error/succses")",
+		'errorMessage': "aqui el mensaje de error"
+	}
+'''
+@app.route('/user/favorites/add', methods = ['POST'])
+def fav():
+	#Obtenemos el id del articulo.
+	article = request.json
+	stringErrorMessage = 'Error #00007 / session[\'data\']'
+	stringStatus = 'error'
+	#Verificamos si existe una sesion activa.
+	if 'data' in session:
+		# El usuario tiene una sesion activa.
+		# Creamos la conexion con la base de datos.
+		(client, db) = getConnectionToDB()
+		# Obtenemos los datos de la sesion.
+		email = session['data']['email']
+		password = session['data']['password']
+		# Buscamos al usuario en la base de datos.
+		theUser = db.User.find_one({'email': email, 'password': password})
+		theArticle = db.Article.find_one(ObjectId(article['IDArticle']))
+		#Agregamos el id del articulo a la lista de favoritos.
+		if not article['IDArticle'] in theUser['favorites'] and theArticle:
+			theArticle['likes'] = theArticle['likes'] + 1
+			theUser['favorites'].append(article['IDArticle'])
+			db.Article.update_one({'_id': ObjectId(article['IDArticle'])}, {"$set": theArticle}, upsert=False)
+			#Actualizamos la lista de favoritos del usuario en la bd.
+			db.User.update_one({'email': email}, {"$set": {'favorites': theUser['favorites']}}, upsert=False)
+		# Establesemos el mensaje a retornar.
+		stringErrorMessage = 'All is fine :P'
+		stringStatus = 'success'
+		# Cerramos la conexion con la base de datos.
+		client.close()
+	# Devolvemos el resultado de la peticion.
+	return jsonify({'status': stringStatus, 'errorMessage': stringErrorMessage})
+
+'''
+	Esta peticion retorna los articulos publicados por este usuario.
+	Parametros que retorna: [
+		{
+			"src": "Ubicacion de la imagen.",
+			"title": "Titulo del articulo.",
+			"category": "Categorias a la que pertenece el articulo.",
+			"date": "Fecha de publicacion del articulo.",
+			"text": "Abstract del articulo.",
+			"autorId": "E-Mail del autor del articulo.",
+			"likes": "Cantidad de Likes.",
+			"comments": "Cantidad de comentarios.",
+			"id": "ID del articulo."
+		}, 
+		{ ... },
+		{ ... }
+	]
+'''
+@app.route('/user/published', methods = ['GET'])
+def published():
+	#Creamos la variable donde almacenamos la lista de articulos.
+	published = []
+	#Verificamos si existe una sesion activa.
+	if 'data' in session:
+		# El usuario tiene una sesion activa.
+		# Creamos la conexion con la base de datos.
+		(client, db) = getConnectionToDB()
+		# Obtenemos los datos de la sesion.
+		email = session['data']['email']
+		password = session['data']['password']
+		# Buscamos al usuario en la base de datos.
+		theUser = db.User.find_one({'email': email, 'password': password})
+		# Verificamos si es un autor el que solicita ver su lista de publicados.
+		if theUser['type'] in ['author', 'admin']:
+			#Es un autor.
+			# Obtenemos todos los articulos no publicados creados por ese autor.
+			theArticleList = db.Article.find({'author': email})
+			for article in theArticleList:
+				published.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'],
+				'date': article['time-create'], 'text': article['abstract'], 'autorId': article['author'],
+				'likes': article['likes'], 'coments': article['coments'], 'title': article['title']})
+			#Ordenamos los articulos por fecha.
+			published = sorted(published, key=sortByTime, reverse=True)
+		# Cerramos la conexion con la base de datos.
+		client.close()
+	# Devolvemos el resultado de la peticion.
+	return jsonify({'articles': published})
+
+'''
+	Esta peticion retorna los articulos editados por este usuario.
+	Parametros que retorna: [
+		{
+			"src": "Ubicacion de la imagen.",
+			"title": "Titulo del articulo.",
+			"category": "Categorias a la que pertenece el articulo.",
+			"date": "Fecha de publicacion del articulo.",
+			"text": "Abstract del articulo.",
+			"autorId": "E-Mail del autor del articulo.",
+			"likes": "Cantidad de Likes.",
+			"comments": "Cantidad de comentarios.",
+			"id": "ID del articulo."
+		}, 
+		{ ... },
+		{ ... }
+	]
+'''
+@app.route('/user/edited', methods = ['GET'])
+def edited():
+	#Creamos la variable donde almacenamos la lista de articulos.
+	edited = []
+	#Verificamos si existe una sesion activa.
+	if 'data' in session:
+		# El usuario tiene una sesion activa.
+		# Creamos la conexion con la base de datos.
+		(client, db) = getConnectionToDB()
+		# Obtenemos los datos de la sesion.
+		email = session['data']['email']
+		password = session['data']['password']
+		# Buscamos al usuario en la base de datos.
+		theUser = db.User.find_one({'email': email, 'password': password})
+		# Verificamos si es un editor el que solicita ver su lista de editados.
+		if theUser['type'] in ['editor', 'admin']:
+			#Es un autor.
+			# Obtenemos todos los articulos no publicados.
+			theArticleList = db.Article.find()
+			for article in theArticleList:
+				#Verificamos si el usuario edito dicho articulo.
+				if email in article['editors']:
+				#Si fue editado por este usuario lo añadimos a la lista.
+					edited.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'],
+					'date': article['time-create'], 'text': article['abstract'], 'autorId': article['author'],
+					'likes': article['likes'], 'coments': article['coments'], 'title': article['title']})
+			#Ordenamos los articulos por fecha.
+			edited = sorted(edited, key=sortByTime, reverse=True)
+		# Cerramos la conexion con la base de datos.
+		client.close()
+	# Devolvemos el resultado de la peticion.
+	return jsonify({'articles': edited})	
+
+'''
+	Remueve el articulo seleccionado de la lista de favoritos del usuario.
+	Parametro que resibe: {
+		"IDArticle": "aqui recibimos el id del articulo",
+	}
+	Parametros que retorna: {
+		"status": "aqui el resultado de la solicitud ("error/succses")",
+		'errorMessage': "aqui el mensaje de error"
+	}
+'''
+@app.route('/user/favorites/delete', methods = ['POST'])
+def favdelete():
+	#Obtenemos el id del articulo.
+	article = request.json
+	stringErrorMessage = 'Error #00007 / session[\'data\']'
+	stringStatus = 'error'
+	#Verificamos si existe una sesion activa.
+	if 'data' in session:
+		# El usuario tiene una sesion activa.
+		# Creamos la conexion con la base de datos.
+		(client, db) = getConnectionToDB()
+		# Obtenemos los datos de la sesion.
+		email = session['data']['email']
+		password = session['data']['password']
+		# Obtenemos los datos del comentario.
+		comment = request.json
+		# Buscamos al usuario en la base de datos.
+		theUser = db.User.find_one({'email': email, 'password': password})
+		theArticle = db.Article.find_one(ObjectId(article['IDArticle']))
+		# Borramos el id del articulo a la lista de favoritos.
+		if article['IDArticle'] in theUser['favorites'] and theArticle:
+			theArticle['likes'] = theArticle['likes'] - 1
+			theUser['favorites'].remove(article['IDArticle'])
+			#Actualizamos la lista de favoritos del usuario en la bd.
+			db.User.update_one({'email': email}, {"$set": {'favorites': theUser['favorites']}}, upsert=False)
+			db.Article.update_one({'_id': ObjectId(article['IDArticle'])}, {"$set": theArticle}, upsert=False)
+		# Establesemos el mensaje a retornar.
+		stringErrorMessage = 'All is fine :P'
+		stringStatus = 'success'
+		# Cerramos la conexion con la base de datos.
+		client.close()
+	# Devolvemos el resultado de la peticion.
+	return jsonify({'status': stringStatus, 'errorMessage': stringErrorMessage})
+
+'''
+	Resetea la base de datos.
+'''
+@app.route('/db/reset', methods = ['GET'])
+def delete_db():
+	if 'data' in session:
+		(client, db) = getConnectionToDB()
+		email = session['data']['email']
+		password = session['data']['password']
+		theUser = db.User.find_one({'email': email, 'password': password})
+		if theUser['type'] == 'admin':
+			client.drop_database('DailyPlanet')
+		client.close()
+		session.pop('data', None)
+		return "<h1>Usted acaba de borrar la base de datos! :P</h1>"
+	return "<h1>Usted no puede hacer esto :(</h1>"
+
+'''
+	Esta peticion retorna los articulos que se mostraan en el feed principal.
+	Parametro que resibe: {
+		"initArticle": "Numero del articulo inicial.",
+		"numArticles": "Numero de articulos a desplegar.", // -1 para no limitar.
+		"query": "La palaba a buscar", // Vacio para no limitar.
+		"categoryArticle": "Categoria a la que pertenece el articulo.", // Vacio para no limitar.
+		"sortMode": "Modo de ordenamiento 'date-time', 'fab', 'comment'",
+		"sortRule": "Ordenamiento creciente '<', Ordenamiento decreciente '>'"
+	}
+	Parametros que retorna: [
+		{
+			"src": "Ubicacion de la imagen.",
+			"title": "Titulo del articulo.",
+			"category": "Categorias a la que pertenece el articulo.",
+			"date": "Fecha de publicacion del articulo.",
+			"text": "Abstract del articulo.",
+			"autorId": "E-Mail del autor del articulo.",
+			"likes": "Cantidad de Likes.",
+			"comments": "Cantidad de comentarios.",
+			"id": "ID del articulo."
+		}, 
+		{ ... },
+		{ ... }
+	]
+'''
+@app.route('/search', methods = ['POST'])
+def search():
+	returnData = []
+	filteredData = []
+	theUser = None
+	(client, db) = getConnectionToDB()
+	allArticleList = db.Article.find({'posted': True})
+	info = request.json
+	for article in allArticleList:
+		if not info['query'] or simpleSearch(db, article, info['query']):
+			if not info['categoryArticle'] or info['categoryArticle'] == article['category']:
+				filteredData.append(article)
+	if 'data' in session:
+		email = session['data']['email']
+		password = session['data']['password']
+		theUser = db.User.find_one({'email': email, 'password': password})
+	if theUser :
+		# Es un usuario registrado.
+		for article in filteredData:
+			returnData.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'], 'date': article['time-create'], 'text': article['abstract'], 'autorId': article['author'], 'likes': article['likes'], 'comments': article['coments'], 'title': article['title']})
+	else:
+		# No es un usuario registrado.
+		for article in filteredData:
+			if datetime.now().date() == datetime.strptime(article['time-create'], "%d/%m/%Y - %I:%M%p").date():
+				returnData.append({'id': str(article['_id']), 'src': article['image'], 'category': article['category'], 'date': article['time-create'], 'text': article['abstract'], 'autorId': article['author'], 'likes': article['likes'], 'comments': article['coments'], 'title': article['title']})
+	if info['sortMode'] == 'fab':
+		returnData = sorted(returnData, key=sortByFav, reverse=info['sortRule'] == '>')
+	elif info['sortMode'] == 'comment':
+		returnData = sorted(returnData, key=sortByComment, reverse=info['sortRule'] == '>')
+	else:
+		returnData = sorted(returnData, key=sortByTime, reverse=info['sortRule'] == '>')
+	# Cerramos la conexion con la base de datos.
+	client.close()
+	initial_var = info['initArticle'] if info['initArticle'] else 0
+	end_var = initial_var + info['numArticles'] if not info['numArticles'] == -1 else len(returnData)
+	end_var = min(end_var, len(returnData))
+	articleList = []
+	for i in range(initial_var, end_var):
+		articleList.append(returnData[i])
+	# Devolvemos el resultado de la peticion.
+	return jsonify({'articles': articleList})
+
+
+"""
+	Iniciamos el programa!!!
+"""
 if __name__ == '__main__':
 	app.run(host='localhost', port=80, debug=True)
