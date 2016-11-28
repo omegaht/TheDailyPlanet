@@ -1,10 +1,13 @@
-from flask import Flask, session, request, render_template, jsonify
+from flask import Flask, session, request, render_template, jsonify, url_for
+from werkzeug.utils import secure_filename
 from bson.objectid import ObjectId
 from pymongo import MongoClient
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 app.secret_key = 'VanfH8STX0i0a6I0a4CYF93LoM1Eh6ST6gOa08mio0GrVdU3xYR3Vtfj9kkpj8p5'
+app.config['UPLOAD_FOLDER'] = './static/upload/'
 
 def getConnectionToDB():
 	client = MongoClient('localhost', 27017)
@@ -914,6 +917,27 @@ def search():
 	# Devolvemos el resultado de la peticion.
 	return jsonify({'articles': articleList})
 
+'''
+	Carga un archivo al servidor.
+	Parametro que resibe: form-data -> file=
+	Parametros que retorna: {
+		"status": "aqui el resultado de la solicitud ("error/succses")",
+		"errorMessage": "aqui el mensaje de error",
+		"fileId": "el nombre del archivo cargado"
+	}
+'''
+@app.route('/upload', methods = ['POST'])
+def upload():
+	# check if the post request has the file part
+	if 'file' not in request.files:
+		return jsonify({'status': 'error', 'errorMessage': 'No file input.', 'fileId': ''})
+	file = request.files['file']
+	if file.filename == '':
+		return jsonify({'status': 'error', 'errorMessage': 'No selected file.', 'fileId': ''})
+	if file:
+		filename = str(ObjectId()) + os.path.splitext(file.filename)[1]
+		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+		return jsonify({'status': 'success', 'errorMessage': 'All is fine :P', 'fileId': '/static/upload/' + filename})
 
 """
 	Iniciamos el programa!!!
