@@ -936,6 +936,8 @@ def upload():
 		return jsonify({'status': 'error', 'errorMessage': 'No selected file.', 'fileId': ''})
 	if file:
 		filename = str(ObjectId()) + os.path.splitext(file.filename)[1]
+		if not os.path.exists(app.config['UPLOAD_FOLDER']):
+			os.makedirs(app.config['UPLOAD_FOLDER'])
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 		return jsonify({'status': 'success', 'errorMessage': 'All is fine :P', 'fileId': '/static/upload/' + filename})
 
