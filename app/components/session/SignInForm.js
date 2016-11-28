@@ -71,7 +71,7 @@ class SignInForm extends React.Component {
 								hintText="Enter your email"
 								floatingLabelText="Email"
 								onChange={this.handleChange}
-								type="text"
+								type="email"
 								value={this.state.email}
 								style={styles}
 								/>
@@ -91,7 +91,7 @@ class SignInForm extends React.Component {
 								name="password"
 								floatingLabelText="Password"
 								onChange={this.handleChange}
-								type="text"
+								type="password"
 								value={this.state.comment}
 								style={styles}
 								/>

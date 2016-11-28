@@ -65,7 +65,7 @@ class UserProfile extends Component {
         this.setState({ email: this.state.email, type: event.target.value, name: this.state.name, password: this.state.password })
       if (event.target.name === 'name')
         this.setState({ email: this.state.email, type: this.state.type, name: event.target.value, password: this.state.password })
-      if (event.target.name === 'name')
+      if (event.target.name === 'password')
         this.setState({ email: this.state.email, type: this.state.type, name: event.target.value, password: event.target.value })
     } else {
       alert('no active session bitch!');

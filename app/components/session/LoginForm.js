@@ -59,7 +59,7 @@ class LoginForm extends React.Component {
 								name="email"
 								floatingLabelText="Enter your email"
 								onChange={this.handleChange}
-								type="text"
+								type="email"
 								value={this.state.email}
 								style={styles}
 								/>
@@ -69,7 +69,7 @@ class LoginForm extends React.Component {
 								name="password"
 								floatingLabelText="Enter your password"
 								onChange={this.handleChange}
-								type="text"
+								type="password"
 								value={this.state.comment}
 								style={styles}
 								/>
