@@ -190,8 +190,8 @@ def info():
 			description = theUser['description']
 			stringErrorMessage = 'All is fine :P'
 			stringStatus = 'success'
-		# Devolvemos el resultado de la peticion.
-		return jsonify({'status': stringStatus, 'errorMessage': stringErrorMessage, 'email': email, 'name': name, 'type': UserType, 'favorites': favorites, 'image': image, 'description': description})
+			# Devolvemos el resultado de la peticion.
+			return jsonify({'status': stringStatus, 'errorMessage': stringErrorMessage, 'email': email, 'name': name, 'type': UserType, 'favorites': favorites, 'image': image, 'description': description})
 	if request.method == 'POST':
 		# Creamos la conexion con la base de datos.
 		(client, db) = getConnectionToDB()
@@ -212,8 +212,8 @@ def info():
 			description = theUser['description']
 			# Devolvemos el resultado de la peticion.
 			return jsonify({'status': 'success', 'errorMessage': 'All is fine :P', 'email': email, 'name': name, 'type': UserType, 'favorites': favorites, 'image': image, 'description': description})
-		else:
-			return jsonify({'status': 'error', 'errorMessage': 'Error #00005 / session[\'data\']', 'email': '', 'name': '', 'type': '', 'favorites': [], 'image': '', 'description': ''})
+	else:
+		return jsonify({'status': 'error', 'errorMessage': 'Error #00005 / session[\'data\']', 'email': '', 'name': '', 'type': '', 'favorites': [], 'image': '', 'description': ''})
 
 '''
 	Esta peticion modifica la informacion del usuario y cierra la session
@@ -551,7 +551,6 @@ def commpost():
 def commget():
 	# Creamos la conexion con la base de datos.
 	(client, db) = getConnectionToDB()
-	#Obtenemos el artículo del cual queremos mostrar sus comentarios.
 	article = request.json
 	# Asignamos donde vamos a obtener el resultado de la consulta.
 	commentList = []

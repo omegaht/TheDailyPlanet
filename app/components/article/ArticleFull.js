@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react';
+import React, {Component, PropTypes} from 'react';
 // Material-ui Componets
 import { Card, CardHeader, CardTitle, CardMedia, CardText, CardActions } from 'material-ui/Card';
 import IconButton from 'material-ui/IconButton';
@@ -37,23 +37,33 @@ const UsersAvatar = ()=> {
 	);
 }
 
-const ArticleFull = props => {
-	return (
-		<Card>
+
+
+class ArticleFull extends Component {
+	constructor(){
+		super();
+	}
+	componentWillMount(){
+		console.log('HI');
+	}
+
+	render() {
+		return (
+			<Card>
 			<CardHeader
 				title={'Test'}
 				subtitle='Subtitle'
 				avatar='https://s-media-cache-ak0.pinimg.com/originals/49/68/0a/49680a5fd4de1b3bbdf2ca3fe0edf089.jpg'
 				/>
 			<CardTitle
-				title={props.article.title}
-				subtitle={props.article.category}
+				title={this.props.article.title}
+				subtitle={this.props.article.category}
 				/>
 			<CardMedia>
-				<img src={props.article.src} />
+				<img src={this.props.article.src} />
 			</CardMedia>
 			<CardText>
-				<div dangerouslySetInnerHTML={{ __html: props.article.text }} ></div>
+				<div dangerouslySetInnerHTML={{ __html: this.props.article.text }} ></div>
 			</CardText>
 			<CardActions>
 				<IconButton tooltip="share" touch={true} tooltipPosition="top-right">
@@ -78,8 +88,13 @@ const ArticleFull = props => {
 				
 			</CardMedia>
 		</Card>
-	);
-};
+		);
+	}
+}
+
+export default ArticleFull;
+
+
 
 ArticleFull.propTypes = {
 	article: PropTypes.object,
@@ -88,4 +103,3 @@ ArticleFull.propTypes = {
 	src: PropTypes.string,
 };
 
-export default ArticleFull;

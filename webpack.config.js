@@ -19,22 +19,26 @@ module.exports = {
     },
     module: {
         loaders: [{
-                test: /\.woff|\.woff2|\.svg|.eot|\.ttf/,
-                loader: 'url-loader?prefix=font/&limit=10000'
+            test: /\.woff|\.woff2|\.svg|.eot|\.ttf/,
+            loader: 'url-loader?prefix=font/&limit=10000'
+        },
+        {
+            test: /\.(js|jsx)?$/,
+            loader: 'babel-loader',
+            query: {
+                presets: ['es2015', 'react']
             },
-            {
-                test: /\.(js|jsx)?$/,
-                loader: 'babel-loader',
-                query: {
-                    presets: ['es2015', 'react']
-                },
-                exclude: /node_modules/,
+            exclude: /node_modules/,
 
-            },
-            {
-                test: /\.css$/,
-                loader: 'style!css?sourceMap'
-            }
+        },
+        {
+            test: /\.css$/,
+            loader: 'style!css?sourceMap'
+        },
+        {
+            test: /\.json$/,
+            loader: 'json'
+        }
         ]
     },
     plugins: []
